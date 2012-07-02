@@ -4,22 +4,28 @@
 
     $('#connect').on('click', function() {
       var userAddress = $('#userAddress').val();
+      
+      if( userAddress != '' )
+      {
+          helper.showSpinner('connectionSpinner');
 
-      helper.showSpinner('connectionSpinner');
+          storage.connect(userAddress, function(error, storageInfo) {
+            if(error) {
+              helper.setConnectionState(false);
+            } else {
+              localStorage.setItem('userStorageInfo', JSON.stringify(storageInfo));
+              localStorage.setItem('userAddress', userAddress);
+              helper.setConnectionState(true);
+            }
 
-      storage.connect(userAddress, function(error, storageInfo) {
-        if(error) {
-          helper.setConnectionState(false);
-        } else {
-          localStorage.setItem('userStorageInfo', JSON.stringify(storageInfo));
-          localStorage.setItem('userAddress', userAddress);
-          helper.setConnectionState(true);
-        }
-
-        helper.hideSpinner('connectionSpinner');
-      });
-
-      return false;
+            helper.hideSpinner('connectionSpinner');
+          });
+      }
+      else
+      {
+          alert('Please enter your useraddress to begin.');
+          return false;
+      }
     });
 
     $('#fetchPublicKey').on('click', function() {
@@ -30,9 +36,13 @@
       storage.getData('public', key, function(error, data) {
         if(!error && data != "null") {
           $('#publicValue').val(data);
+          helper.hideSpinner('fetchPublicSpinner');
         }
-
-        helper.hideSpinner('fetchPublicSpinner');
+        else
+        {
+            alert(error);
+            helper.hideSpinner('fetchPublicSpinner');
+        }        
       });
 
       return false;
